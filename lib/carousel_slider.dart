@@ -185,36 +185,39 @@ class CarouselSliderState extends State<CarouselSlider>
           AspectRatio(aspectRatio: widget.options.aspectRatio, child: child);
     }
 
-    return RawGestureDetector(
+    final tmp = NotificationListener(
+      onNotification: (dynamic notification) {
+        if (widget.options.onScrolled != null &&
+            notification is ScrollUpdateNotification) {
+          widget.options.onScrolled!(carouselState!.pageController!.page);
+        }
+        return false;
+      },
+      child: wrapper,
+    );
+
+    return !widget.options.autoPlay ? tmp :
+    RawGestureDetector(
       gestures: {
         _MultipleGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<_MultipleGestureRecognizer>(
+        GestureRecognizerFactoryWithHandlers<_MultipleGestureRecognizer>(
                 () => _MultipleGestureRecognizer(),
                 (_MultipleGestureRecognizer instance) {
-          instance.onStart = (_) {
-            onStart();
-          };
-          instance.onDown = (_) {
-            onPanDown();
-          };
-          instance.onEnd = (_) {
-            onPanUp();
-          };
-          instance.onCancel = () {
-            onPanUp();
-          };
-        }),
+              instance.onStart = (_) {
+                onStart();
+              };
+              instance.onDown = (_) {
+                onPanDown();
+              };
+              instance.onEnd = (_) {
+                onPanUp();
+              };
+              instance.onCancel = () {
+                onPanUp();
+              };
+            }),
       },
-      child: NotificationListener(
-        onNotification: (dynamic notification) {
-          if (widget.options.onScrolled != null &&
-              notification is ScrollUpdateNotification) {
-            widget.options.onScrolled!(carouselState!.pageController!.page);
-          }
-          return false;
-        },
-        child: wrapper,
-      ),
+      child: tmp,
     );
   }
 
